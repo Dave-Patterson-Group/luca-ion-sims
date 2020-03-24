@@ -13,5 +13,5 @@ finalCloud = evolveCloud(intermediateCloud,pulseSet2,20e-3); % Evolves the inter
 %The following creates two gifs in your current directory, showing the
 %initial and final motion of the ions before and after the cooling
 %sequence.
-animated2dTrajectory(initCloud,'z','x',[0.0e-3 0.5e-3],'initCrystal2.gif'); 
+animated2dTrajectory(intermediateCloud,'z','x',[0.0e-3 0.5e-3],'initCrystal2.gif'); 
 animated2dTrajectory(finalCloud,'z','x',[19.5e-3 20.0e-3],'finalCrystal2.gif'); 
