@@ -62,7 +62,7 @@ for i = 1:(floor(length(dim1Array{1}) / stepLength))
     end
     plot(cmCoords1(i * stepLength),cmCoords2(i * stepLength),'+','MarkerSize',15,'MarkerEdgeColor','k')
     hold on
-    axis([-10e-4 10e-4 -10e-4 10e-4]) 
+    axis([-5e-4 5e-4 -5e-4 5e-4]) 
     forceSquare();
     xlabel(dim1);
     ylabel(dim2);
