@@ -1,0 +1,13 @@
+function ion = initializeDarkIon(xPot,yPot,zPot,darkMass)
+xPot = xPot * sqrt( 88 / darkMass );
+yPot = yPot * sqrt( 88 / darkMass );    %Adjusting frequencies for different mass
+zPot = zPot * sqrt( 88 / darkMass );
+ion.constants = makeConstants();
+ion.xyz = [0 0 0];
+ion.vxvyvz = [0 0 0];
+ion.type = 'Dark';
+ion.mass = darkMass * ion.constants.AMU;
+ion.charge = 1 * ion.constants.E;
+ion.potentialz = generatePotentialZ(zPot,ion.mass);
+ion.potentialx = generatePotentialXY(xPot,ion.mass,ion.potentialz.forceK,'x');
+ion.potentialy = generatePotentialXY(yPot,ion.mass,ion.potentialz.forceK,'y');

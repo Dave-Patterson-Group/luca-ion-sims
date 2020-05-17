@@ -1,15 +1,18 @@
 function plotTrajectories(cloud,lateTimes,lateTimes2,lateTimes3,lateTimes4,lateTimes5)
+%This is a bit of an older function which does a few things. It plots the
+%x, y, and z motion of the first ion in the cloud as a function of time,
+%the energy of the cloud, as a function of time, and 2D trajectory plots
+%for the time spans lateTimes, lateTimes2, lateTimes3, lateTimes4, and
+%lateTimes5, all of which are optional arguments (see the
+%plotJustTrajectories() function, it works the same way). This function is most
+%useful if you're dealing with a cloud of a single ion and want to see a
+%whole bunch of information at once.
+
 doeslateTimes2 = 1;
 doeslateTimes3 = 1;
 doeslateTimes4 = 1;
 doeslateTimes5 = 1;
-isMixed = 0;
-if strcmp(cloud.isMixed,'mixed')
-    isMixed = 1;
-end
-if strcmp(cloud.isMixed,'mlcls')
-    isMixed = 2;
-end
+
 if nargin < 2
     lateTimes = [0.5e-3 Inf];
 end
@@ -25,30 +28,17 @@ end
 if nargin < 6
     doeslateTimes5 = 0;
 end
-figure('Position',[82   107   1414   839],'Name',sprintf('%d atom cloud',cloud.numAtoms));
+figure('Position',[80   80   1000   700],'Name',sprintf('%d atom cloud',cloud.numIons));
 subplot(3,1,1);
 plotXYZ(cloud,1)
-plotXYZ(cloud,2)
-% plotXYZ(cloud,0)
-a= dbstack;
-title([a(2).name '()']);
+%plotXYZ(cloud,2)
+%plotXYZ(cloud,0)
+
 
 subplot(4,1,2);
 plotEnergy(cloud);
 %subplot(3,1,2);
 %plotXYZ(cloud,2)
-
-str1 = " Sr - (" + (cloud.atoms{1}.potentialx.freq / 1000) + " kHz," + (cloud.atoms{1}.potentialy.freq / 1000) + " kHz," + (cloud.atoms{1}.potentialz.freq / 1000)+ " kHz) ";
-str2 = " ";
-if (isMixed == 2)
-    str1 = " ";
-    str2 = " SrO - (" + (cloud.atoms{1}.potentialx.freq / 1000) + " kHz," + (cloud.atoms{1}.potentialy.freq / 1000) + " kHz," + (cloud.atoms{1}.potentialz.freq / 1000)+ " kHz) ";
-end
-
-if (isMixed == 1)
-    str2 = " SrO - (" + (cloud.atoms{2}.potentialx.freq / 1000) + " kHz," + (cloud.atoms{2}.potentialy.freq / 1000) + " kHz," + (cloud.atoms{2}.potentialz.freq / 1000)+ " kHz) ";
-end
-annotation('textbox', [0.1, 0.99, 0.75, 0.01], 'String', "Atoms: " + cloud.numIons + " Molecules: " + cloud.numMolecules + "  Frequencies: " + str1 + str2,'FitBoxToText','on');
 
 if doeslateTimes2
     subplot(4,6,13);

@@ -1,0 +1,10 @@
+function ion = initializeSrIon(xPot,yPot,zPot)
+ion.constants = makeConstants();
+ion.xyz = [0 0 0];
+ion.vxvyvz = [0 0 0];
+ion.type = 'Sr';
+ion.mass = 88 * ion.constants.AMU;
+ion.charge = 1 * ion.constants.E;
+ion.potentialz = generatePotentialZ(zPot,ion.mass);
+ion.potentialx = generatePotentialXY(xPot,ion.mass,ion.potentialz.forceK,'x');
+ion.potentialy = generatePotentialXY(yPot,ion.mass,ion.potentialz.forceK,'y');

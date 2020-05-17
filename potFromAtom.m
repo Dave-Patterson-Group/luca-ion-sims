@@ -5,5 +5,5 @@ switch dimension
     case 'y'
         pot = atom.potentialy;
     case 'z'
-        pot = atom.z;
+        pot = atom.potentialz;
 end

@@ -1,89 +1,79 @@
-function ydotVals = ydot(t,y,cloud,fieldSet,conservative,collided) %see https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
+function ydotVals = ydot(t,y,cloud,fieldSet,collided) %see https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods
 %change this to reflect a potential? or simply hardwire (F = k_e q1 q2) / r^2) but ok for now
 ydotVals = y * 0;
 potentialSet = cloud.potentialSet;
 ii = findIndex(fieldSet.times,t);
 const = makeConstants();
-for i = 1:cloud.numAtoms  %each set is [x y z vx vy vz]
-    mass = cloud.atoms{i}.mass;
+for i = 1:cloud.numIons  %each set is [x y z vx vy vz]
+    mass = cloud.ions{i}.mass;
     vecPos = (i-1) * 6;
     potPos = (i-1) * 3;
     forcex = -y(vecPos+1) * potentialSet{potPos+1}.trueForceK;  %trap potential
     forcey = -y(vecPos+2) * potentialSet{potPos+2}.trueForceK; 
     forcez = -y(vecPos+3) * potentialSet{potPos+3}.forceK;
     
-    spotSizePulse = fieldSet.waistPulse * (sqrt(1 + ((y(vecPos+1) - fieldSet.OPxCenterPulse) / fieldSet.xRPulse)^2 ));
-    EfieldPulse = fieldSet.EzeroPulse * (fieldSet.waistPulse / spotSizePulse) * exp(-( ((y(vecPos+2) - fieldSet.OPyCenterPulse)^2) + ((y(vecPos+3) - fieldSet.OPzCenterPulse)^2) ) / (spotSizePulse * spotSizePulse));
-    twoAlphaEPulse = 2 * fieldSet.polarizabilityPulse * EfieldPulse;
-    
-    forcex = forcex - (fieldSet.pulseLaser(ii) * twoAlphaEPulse * 2 * ((y(vecPos+1) - fieldSet.OPxCenterPulse) / (fieldSet.xRPulse^2)) * (spotSizePulse^(-2)) * EfieldPulse * ( ( ((y(vecPos+2) - fieldSet.OPyCenterPulse)^2) + ((y(vecPos+3) - fieldSet.OPzCenterPulse)^2) ) - (0.5 * (fieldSet.waistPulse^2))));
-    forcey = forcey - (fieldSet.pulseLaser(ii) * twoAlphaEPulse * 2 * (y(vecPos+2) - fieldSet.OPyCenterPulse) * (spotSizePulse^(-2)) * EfieldPulse);
-    forcez = forcez - (fieldSet.pulseLaser(ii) * twoAlphaEPulse * 2 * (y(vecPos+3) - fieldSet.OPzCenterPulse) * (spotSizePulse^(-2)) * EfieldPulse);
-    
-    spotSizeCW = fieldSet.waistCW * (sqrt(1 + ((y(vecPos+1) - fieldSet.OPxCenterCW) / fieldSet.xRCW)^2 ));
-    EfieldCW = fieldSet.EzeroCW * (fieldSet.waistCW / spotSizeCW) * exp(-( ((y(vecPos+2) - fieldSet.OPyCenterCW)^2) + ((y(vecPos+3) - fieldSet.OPzCenterCW)^2) ) / (spotSizeCW * spotSizeCW));
-    twoAlphaECW = 2 * fieldSet.polarizabilityCW * EfieldCW;
-    
-    forcex = forcex - (fieldSet.CWLaser(ii) * twoAlphaECW * 2 * ((y(vecPos+1) - fieldSet.OPxCenterCW) / (fieldSet.xRCW^2)) * (spotSizeCW^(-2)) * EfieldCW * ( ( ((y(vecPos+2) - fieldSet.OPyCenterCW)^2) + ((y(vecPos+3) - fieldSet.OPzCenterCW)^2) ) - (0.5 * (fieldSet.waistCW^2))));
-    forcey = forcey - (fieldSet.CWLaser(ii) * twoAlphaECW * 2 * (y(vecPos+2) - fieldSet.OPyCenterCW) * (spotSizeCW^(-2)) * EfieldCW);
-    forcez = forcez - (fieldSet.CWLaser(ii) * twoAlphaECW * 2 * (y(vecPos+3) - fieldSet.OPzCenterCW) * (spotSizeCW^(-2)) * EfieldCW);
-    
+    if fieldSet.tweezer(ii)
+        spotSize = fieldSet.tweezerParameter.waist * (sqrt(1 + ((y(vecPos+1) - fieldSet.tweezerParameter.x) / fieldSet.tweezerParameter.xR)^2 ));
+        expTerm = exp(-2*( ((y(vecPos+2) - fieldSet.tweezerParameter.y)^2) + ((y(vecPos+3) - fieldSet.tweezerParameter.z)^2) ) / (spotSize^2));
+        
+        forcex = forcex - ( (2 * fieldSet.tweezerParameter.depth * expTerm * (y(vecPos+1) - fieldSet.tweezerParameter.x) / (fieldSet.tweezerParameter.xR^2 * (1 + ((y(vecPos+1) - fieldSet.tweezerParameter.x) / fieldSet.tweezerParameter.xR)^2 )^2) ) - ( (4 * fieldSet.tweezerParameter.depth * expTerm * (y(vecPos+1) - fieldSet.tweezerParameter.x) * ((y(vecPos+2) - fieldSet.tweezerParameter.y)^2 + (y(vecPos+3) - fieldSet.tweezerParameter.z)^2)) / (fieldSet.tweezerParameter.xR^2 * fieldSet.tweezerParameter.waist^2 * (1 + ((y(vecPos+1) - fieldSet.tweezerParameter.x) / fieldSet.tweezerParameter.xR)^2 )^3) ) );
+        forcey = forcey - (4 * fieldSet.tweezerParameter.depth * expTerm * (y(vecPos+2) - fieldSet.tweezerParameter.y) / (spotSize^2) );
+        forcez = forcez - (4 * fieldSet.tweezerParameter.depth * expTerm * (y(vecPos+3) - fieldSet.tweezerParameter.z) / (spotSize^2) );
+    end
     
     isSlappedX = 0;
     isSlappedY = 0;
     isSlappedZ = 0;
-    for j = 1:length(fieldSet.xAtoms)
-        if i == fieldSet.xAtoms(j)
+    for j = 1:length(fieldSet.slap.xAtoms)
+        if i == fieldSet.slap.xAtoms(j)
             isSlappedX = 1;
         end
     end
-    for j = 1:length(fieldSet.yAtoms)
-        if i == fieldSet.yAtoms(j)
+    for j = 1:length(fieldSet.slap.yAtoms)
+        if i == fieldSet.slap.yAtoms(j)
             isSlappedY = 1;
         end
     end
-    for j = 1:length(fieldSet.zAtoms)
-        if i == fieldSet.zAtoms(j)
+    for j = 1:length(fieldSet.slap.zAtoms)
+        if i == fieldSet.slap.zAtoms(j)
             isSlappedZ = 1;
         end
     end
     
-    if conservative == 0  %add in drives
-        forcex = forcex + (fieldSet.Ex(ii));  %drive field and noise
-        forcex = forcex - (y(vecPos+1) * fieldSet.E2x(ii)); %squeezing or trap scaling
-        if isSlappedX
-            forcex = forcex + fieldSet.slapx(ii);
-        end
-        
-        forcey = forcey + (fieldSet.Ey(ii));
-        forcey = forcey - (y(vecPos+2) * fieldSet.E2y(ii)); %squeezing or trap scaling
-        if isSlappedY
-            forcey = forcey + fieldSet.slapy(ii);
-        end
-            
-        forcez = forcez + (fieldSet.Ez(ii));
-        forcez = forcez - (y(vecPos+3) * fieldSet.E2z(ii)); %squeezing or trap scaling
-        if isSlappedZ
-            forcez = forcez + fieldSet.slapz(ii);
-        end
-        
+    forcex = forcex + (fieldSet.Ex(ii));  %drive field and noise
+    forcex = forcex - (y(vecPos+1) * fieldSet.E2x(ii)); %squeezing or trap scaling
+    if isSlappedX
+        forcex = forcex + fieldSet.slapx(ii);
     end
-    if cloud.atoms{i}.friction == 1
+    
+    forcey = forcey + (fieldSet.Ey(ii));
+    forcey = forcey - (y(vecPos+2) * fieldSet.E2y(ii)); %squeezing or trap scaling
+    if isSlappedY
+        forcey = forcey + fieldSet.slapy(ii);
+    end
+    
+    forcez = forcez + (fieldSet.Ez(ii));
+    forcez = forcez - (y(vecPos+3) * fieldSet.E2z(ii)); %squeezing or trap scaling
+    if isSlappedZ
+        forcez = forcez + fieldSet.slapz(ii);
+    end
         
-        delta = fieldSet.delta; %  detuning: + => blue, - => red   CHANGE THIS ONE TO ALTER LASER
+    if strcmp(cloud.ions{i}.type,'Sr')
+        
+        delta = fieldSet.cooling.delta; %  detuning: + => blue, - => red 
         
         omega0 = 7.1116297286e14; % angular frequency of Sr transition
         omega = omega0 + delta; % angular frequency of cooling laser
         k = omega / const.C; % wavenumber of cooling laser
         gamma = 2 * pi * 21e6; % linewidth
         
-        % fieldSet.frictionx(ii) is the fraction I / I-sat
-        % I think I need to make the frequency of something a spread
-        % instead of a delta function
+        % fieldSet.coolingx(ii) is the fraction I / I-sat
+        % TODO: Maybe make the laser frequency a distribution instead of a
+        % delta function?
         
-        Rvx = ((gamma / 2) * fieldSet.frictionx(ii)) / (1 + fieldSet.frictionx(ii) + ((4 / (gamma^2)) * (delta - (k * y(vecPos+4) ) )^2 ) );
-        Rvy = ((gamma / 2) * fieldSet.frictiony(ii)) / (1 + fieldSet.frictiony(ii) + ((4 / (gamma^2)) * (delta - (k * y(vecPos+5) ) )^2 ) );
-        Rvz = ((gamma / 2) * fieldSet.frictionz(ii)) / (1 + fieldSet.frictionz(ii) + ((4 / (gamma^2)) * (delta - (k * y(vecPos+6) ) )^2 ) );
+        Rvx = ((gamma / 2) * fieldSet.coolingx(ii)) / (1 + fieldSet.coolingx(ii) + ((4 / (gamma^2)) * (delta - (k * y(vecPos+4) ) )^2 ) );
+        Rvy = ((gamma / 2) * fieldSet.coolingy(ii)) / (1 + fieldSet.coolingy(ii) + ((4 / (gamma^2)) * (delta - (k * y(vecPos+5) ) )^2 ) );
+        Rvz = ((gamma / 2) * fieldSet.coolingz(ii)) / (1 + fieldSet.coolingz(ii) + ((4 / (gamma^2)) * (delta - (k * y(vecPos+6) ) )^2 ) );
         
         theta = pi * rand();
         phi = 2 * pi * rand();
@@ -94,11 +84,7 @@ for i = 1:cloud.numAtoms  %each set is [x y z vx vy vz]
         
         
     end
-    if cloud.atoms{i}.friction == 0
-        forcex = forcex + (fieldSet.opticalx(ii));
-        forcey = forcey + (fieldSet.opticaly(ii));
-        forcez = forcez + (fieldSet.opticalz(ii));
-    end
+    
     
     if collided(i)
         const = makeConstants();
@@ -129,19 +115,18 @@ for i = 1:cloud.numAtoms  %each set is [x y z vx vy vz]
     ydotVals(vecPos+5) = forcey/mass; %dv_x/dt = f_x/m
     ydotVals(vecPos+6) = forcez/mass; %dv_x/dt = f_x/m
 end
-%now put in interactions
-if cloud.interacting
-    for i = 1:cloud.numAtoms
-        for j = i+1:cloud.numAtoms
-            ivecPos = (i-1) * 6;
-            jvecPos = (j-1) * 6;
-            iPos = y(ivecPos+(1:3));
-            jPos = y(jvecPos+(1:3));
-            F = couloumbForce(iPos,jPos);
-            acci = F/cloud.atoms{i}.mass;
-            accj = -F/cloud.atoms{j}.mass;
-            ydotVals(ivecPos+(4:6)) = ydotVals(ivecPos+(4:6)) + acci;
-            ydotVals(jvecPos+(4:6)) = ydotVals(jvecPos+(4:6)) + accj;
-        end
+%Coulomb interactions:
+for i = 1:cloud.numIons
+    for j = i+1:cloud.numIons
+        ivecPos = (i-1) * 6;
+        jvecPos = (j-1) * 6;
+        iPos = y(ivecPos+(1:3));
+        jPos = y(jvecPos+(1:3));
+        F = couloumbForce(iPos,jPos);
+        acci = F/cloud.ions{i}.mass;
+        accj = -F/cloud.ions{j}.mass;
+        ydotVals(ivecPos+(4:6)) = ydotVals(ivecPos+(4:6)) + acci;
+        ydotVals(jvecPos+(4:6)) = ydotVals(jvecPos+(4:6)) + accj;
     end
 end
+

@@ -1,17 +1,20 @@
 function plotJustTrajectories(cloud,lateTimes,lateTimes2,lateTimes3,lateTimes4,lateTimes5)
+%This function allows you to plot the trajectories of the ions for up to 5
+%different time spans on a single figure. lateTimes, lateTimes2,
+%lateTimes3, lateTimes4, and lateTimes5 are all optional arguments, which
+%are timeSpan arrays: [startTime endTime] (ex. [0 1e-3])
+%For example, both of the following are valid calls of the function:
+%plotJustTrajectories(cloud,[0 1e-3]);
+%plotJustTrajectories(cloud,[0 2e-4],[2e-4 4e-4],[4e-4 6e-4],[6e-4 8e-4],[8e-4 1e-3]);
+
+
 doeslateTimes2 = 1;
 doeslateTimes3 = 1;
 doeslateTimes4 = 1;
 doeslateTimes5 = 1;
-isMixed = 0;
-if strcmp(cloud.isMixed,'mixed')
-    isMixed = 1;
-end
-if strcmp(cloud.isMixed,'mlcls')
-    isMixed = 2;
-end
+
 if nargin < 2
-    lateTimes = [0.5e-3 Inf];
+    lateTimes = [5e-3 Inf];
 end
 if nargin < 3
     doeslateTimes2 = 0;
@@ -26,18 +29,7 @@ if nargin < 6
     doeslateTimes5 = 0;
 end
 width = (2 + doeslateTimes2 + doeslateTimes3 + doeslateTimes4 + doeslateTimes5) * 300;
-figure('Position',[82   107   width   630],'Name',sprintf('%d atom cloud',cloud.numAtoms));
-% 
-% str1 = " Sr - (" + (cloud.atoms{1}.potentialx.freq / 1000) + " kHz," + (cloud.atoms{1}.potentialy.freq / 1000) + " kHz," + (cloud.atoms{1}.potentialz.freq / 1000)+ " kHz) ";
-% if (isMixed == 2)
-%     str1 = " ";
-% end
-% 
-% str2 = " ";
-% if ((isMixed == 1) || (isMixed == 2))
-%     str2 = " SrO - (" + (cloud.atoms{2}.potentialx.freq / 1000) + " kHz," + (cloud.atoms{2}.potentialy.freq / 1000) + " kHz," + (cloud.atoms{2}.potentialz.freq / 1000)+ " kHz) ";
-% end
-% annotation('textbox', [0.1, 0.99, 0.75, 0.01], 'String', "Atoms: " + cloud.numIons + " Molecules: " + cloud.numMolecules + "  Frequencies: " + str1 + str2,'FitBoxToText','on');
+figure('Position',[82   107   width   630],'Name',sprintf('%d atom cloud',cloud.numIons));
 
 if doeslateTimes5
     subplot(2,6,1);

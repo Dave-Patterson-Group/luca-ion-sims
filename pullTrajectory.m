@@ -10,3 +10,9 @@ for i = 1:length(cloud.varOrder)
     end
 end
 coord = coord(firsti:lasti);
+
+%Whichvar is either 'x1','y1','z1','x2,'y2', ... 'xN','yN', or 'zN'
+%where N is the total number of ions. picking 'x1' causes the function to
+%return the x-trajectory of the first ion in the specified timeWindow
+%[startTime endTime]. Picking 'y2' returns the y trajectory of the 2nd ion,
+%and so on.

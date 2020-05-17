@@ -1,0 +1,18 @@
+function pulse = pulseTweezer(timespan,xCenter,yCenter,zCenter,depth)
+if nargin < 2
+    xCenter = 0;
+    yCenter = 0;
+    zCenter = 0;
+end
+if nargin < 5
+    depth = 2.369e-25;
+end
+pulse.pulseType = sprintf('tweezer');
+pulse.timeSpan = timespan;
+pulse.waist = 3e-6;
+pulse.xR = 53e-6;
+pulse.depth = depth;
+pulse.x = xCenter;
+pulse.y = yCenter;
+pulse.z = zCenter;
+

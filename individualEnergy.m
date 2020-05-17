@@ -1,9 +1,9 @@
 function e = individualEnergy(y,cloud)
-%returns just energy from trap itself, not applied fields
-e = zeros(1,cloud.numAtoms);
+%returns just energy from trap itself and other ions, not applied fields
+e = zeros(1,cloud.numIons);
 potentialSet = cloud.potentialSet;
-for i = 1:cloud.numAtoms  %each set is [x y z vx vy vz]
-    mass = cloud.atoms{i}.mass;
+for i = 1:cloud.numIons  %each set is [x y z vx vy vz]
+    mass = cloud.ions{i}.mass;
     
     vecPos = (i-1) * 6;
     potPos = (i-1) * 3;
@@ -17,14 +17,17 @@ for i = 1:cloud.numAtoms  %each set is [x y z vx vy vz]
     kinz = 0.5 * mass * y(vecPos+6) * y(vecPos+6);
     
     e(i) = potx + poty + potz + kinx + kiny + kinz;
-    if cloud.interacting
-        for j = i+1:cloud.numAtoms
-            ivecPos = (i-1) * 6;
-            jvecPos = (j-1) * 6;
-            iPos = y(ivecPos+(1:3));
-            jPos = y(jvecPos+(1:3));
-            U = couloumbPot(iPos,jPos);
-            e(i) = e(i) + U;
-        end
+    for j = [1:(i-1) (i+1):cloud.numIons]
+        ivecPos = (i-1) * 6;
+        jvecPos = (j-1) * 6;     
+        iPos = y(ivecPos+(1:3)); 
+        jPos = y(jvecPos+(1:3));
+        U = couloumbPot(iPos,jPos);
+        e(i) = e(i) + U;
     end
 end
+
+%This function keeps track of the individual energies of each ion, where
+%all of the other ions are treated as an external potential. This means
+%that the sum of the individual energies will be greater than the total
+%energy. Keep this in mind when using this function!

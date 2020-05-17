@@ -2,8 +2,8 @@ function e = energy(y,cloud)
 %returns just energy from trap itself, not applied fields
 e = 0;
 potentialSet = cloud.potentialSet;
-for i = 1:cloud.numAtoms  %each set is [x y z vx vy vz]
-    mass = cloud.atoms{i}.mass;
+for i = 1:cloud.numIons  %each set is [x y z vx vy vz]
+    mass = cloud.ions{i}.mass;
     
     vecPos = (i-1) * 6;
     potPos = (i-1) * 3;
@@ -18,15 +18,15 @@ for i = 1:cloud.numAtoms  %each set is [x y z vx vy vz]
     
     e = e + potx + poty + potz + kinx + kiny + kinz;
 end
-if cloud.interacting
-    for i = 1:cloud.numAtoms
-        for j = i+1:cloud.numAtoms
-            ivecPos = (i-1) * 6;
-            jvecPos = (j-1) * 6;
-            iPos = y(ivecPos+(1:3));
-            jPos = y(jvecPos+(1:3));
-            U = couloumbPot(iPos,jPos);
-            e = e + U;
-        end
+for i = 1:cloud.numIons
+    for j = i+1:cloud.numIons
+        ivecPos = (i-1) * 6;
+        jvecPos = (j-1) * 6;
+        iPos = y(ivecPos+(1:3));
+        jPos = y(jvecPos+(1:3));
+        U = couloumbPot(iPos,jPos);
+        e = e + U;
     end
 end
+
+%Calculates the energy of the entire cloud, as a whole

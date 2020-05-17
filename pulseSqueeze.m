@@ -1,0 +1,10 @@
+function pulse = pulseSqueeze(atom,dimension,phase,timeSpan,squeezeFactor)
+pot = potFromAtom(atom,dimension);
+pulse.pulseType = sprintf('E2%c',dimension);
+pulse.timeSpan = timeSpan;
+pulse.phase = phase;
+pulse.freq = pot.freq * 2;
+numCycles = (timeSpan(2) - timeSpan(1))*pot.freq; 
+ampPerCycle = (squeezeFactor^(1/numCycles) - 1);
+pulse.amp = 1 * ampPerCycle * pot.forceK;  %work out from squeezeFactor. units of V/m^2
+

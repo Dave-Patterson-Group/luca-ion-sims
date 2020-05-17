@@ -1,79 +1,42 @@
-function cloud = initializeCloud(numAtoms,numFriction,cloudType,xPot,yPot,zPot)
-if nargin < 2
-    numFriction = numAtoms;
-    cloudType = 'tightZ';
+%Start here! This will probably be the first function in any script you write
+%It generates a cloud with numSr strontium ions and numDark dark ions
+%xPot,yPot,and zPot are the secular frequencies of the strontium ions
+%darkMass is the mass of the dark ions/molecules, default is 89 amu (SrH)
+%micro is a bool, 1 means micromotion is turned on, 0 means it's off
+
+function cloud = initializeCloud(numSr,numDark,xPot,yPot,zPot,darkMass,micro)
+if nargin < 3   
+    xPot = 100e3; % Secular frequencies of Sr ions in x,y,z.
+    yPot = 101e3; % if micromotion is on (micro = 1), 
+    zPot = 50e3;  % then x and y are only approximate
 end
-if numFriction == numAtoms
-    isMixed = 'atoms';
-else
-    if numFriction ~= numAtoms && numFriction ~= 0
-        isMixed = 'mixed';
-    end
-    if numFriction == 0
-        isMixed = 'mlcls';
-    end
+if nargin < 6
+    darkMass = 89; %default dark ion mass in AMU
 end
-atoms = cell(1,numAtoms);
-if strcmp(isMixed,'atoms')
-    for i = 1:numAtoms
-        switch cloudType
-            case 'tightZ'
-                atoms{i} = initializeTightAtom(1);
-            case 'looseZ'
-                atoms{i} = initializeLooseAtom(1);
-            case 'customZ'
-                atoms{i} = initializeCustomAtom(1,xPot,yPot,zPot);
-        end
-    end     
+if nargin < 7
+    micro = 1; %micromotion on by default
 end
 
-if strcmp(isMixed,'mlcls')
-    for i = 1:numAtoms
-        switch cloudType
-            case 'tightZ'
-                atoms{i} = initializeTightAtom(2);
-            case 'looseZ'
-                atoms{i} = initializeLooseAtom(2);
-            case 'customZ'
-                atoms{i} = initializeCustomAtom(2,xPot,yPot,zPot);
-        end
-    end     
+ions = cell(1,numSr + numDark); %ions is a list of 
+for i = 1:numSr
+    ions{i} = initializeSrIon(xPot,yPot,zPot);
 end
-
-if strcmp(isMixed,'mixed')
-    for i = 1:numFriction
-        switch cloudType
-            case 'tightZ'
-                atoms{i} = initializeTightAtom(1);
-            case 'looseZ'
-                atoms{i} = initializeLooseAtom(1);
-            case 'customZ'
-                atoms{i} = initializeCustomAtom(1,xPot,yPot,zPot);
-        end
-    end
-    for i = (numFriction+1):numAtoms
-      switch cloudType
-           case 'tightZ'
-               atoms{i} = initializeTightAtom(2);
-           case 'looseZ'
-               atoms{i} = initializeLooseAtom(2);
-           case 'customZ'
-               atoms{i} = initializeCustomAtom(2,xPot,yPot,zPot);
-      end
-    end      
+for i = (numSr+1):(numSr+numDark)
+    ions{i} = initializeDarkIon(xPot,yPot,zPot,darkMass);
 end
-
-cloud.numAtoms = numAtoms;
-cloud.numIons = numFriction;
-cloud.numMolecules = numAtoms - numFriction;
-cloud.atoms = atoms;
+cloud.numIons = numSr + numDark;
+cloud.numSr = numSr;
+cloud.numDark = numDark;
+cloud.ions = ions;
 cloud.dt = 1e-8;
-cloud.interacting = 1;
 cloud = updateCloud(cloud);
 cloud = tickleCloud(cloud);
-cloud.isMixed = isMixed;
+cloud.micro = micro;
+cloud.darkMass = darkMass;
+
 cloud.bufferGasBool = false;
 cloud.bufferGasTime = [0 0];
-cloud.bufferGasDensity = 0;
+cloud.bufferGasDensity = 0;     % Come back and adjust this later
 cloud.bufferGasTemp = 0;
 cloud.numCollisions = 0;
+

@@ -8,31 +8,8 @@ switch pulse.pulseType
         nArray = pulse.amp * cos(times * pulse.freq * 2 * pi); %ones(size(times));
         wiggle = nArray;
         
-    case{'pulseLaser','CWLaser'}
+    case{'tweezer'}
         wiggle = ones(size(times));
-
-    case{'opticalx','opticaly','opticalz'}
-        dt = times(2) - times(1);
-        t = times(end) - times(1);
-        numFlips = round(t * pulse.freq);
-        avgFlipInterval = ceil(length(times) / numFlips);
-        noiseArray = randn(size(times)) * pulse.amp / sqrt(dt);
-        wiggle = noiseArray;
-        flipInterval = zeros(1,(numFlips + 1));
-        for l = 1:(numFlips + 1)
-            flipInterval(l) = ceil(avgFlipInterval + (50 * randn));
-        end
-        j = 1;
-        k = 1;
-        for i = 2:length(times)
-            if mod(k,flipInterval(j)) ~= 0
-                wiggle(i) = wiggle(i-1);
-                k = k+1;
-            else
-                j = j+1;
-                k = 1;
-            end
-        end
         
     case{'chirpx','chirpy','chirpz'}
         intStart = round(pulse.timeSpan(1) / 5e-9);
