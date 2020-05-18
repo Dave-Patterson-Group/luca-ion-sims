@@ -1,6 +1,6 @@
 function pot = generatePotentialXY(xyPot,m,zForceK,axis,RF)
 if nargin < 5
-    RF = 4e6;
+    RF = 2e6;
 end
 switch axis
     case 'x'
