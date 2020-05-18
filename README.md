@@ -12,6 +12,7 @@ To run a simulation, you can either create a new Matlab function with all of the
 For an example of the former, see the function EXAMPLEshowCrystallize()
 For any simulation you want to run, there are 4 basic steps:
 
+
 Step 1: Initializing the cloud
 In order to start a simulation, you need to create a cloud using the function initializeCloud(), as follows:
 
@@ -31,6 +32,8 @@ darkMass (int) is the mass of the dark ions in AMU (default is 89)
 micro (logical 1 or 0) determines whether micromotions are turned on (1) or off (0) (default is 1)
 
 For example, you could have myFirstCloud = initializeCloud(2,1,150e3,160e3,73e3,104,1);
+
+
 
 Step 2: Generating the pulseSet
 Next, you need to specify what kinds of stimuli you want to apply to the ions.
@@ -72,6 +75,7 @@ pulseSet = pulseCooling({},1.5,10e-3);
 pulseSet{end+1} = pulseEfield(1e-20,55e3);
 
 
+
 Step 3: Evolving the cloud
 Once you have an initialized cloud and a pulseSet, you evolve the cloud through time via the evolveCloud() function, which returns a new cloud with the same kinds of properties as the initial cloud, plus some extra ones, including a list of trajectories of the individual ions as they evolved through time.
 
@@ -87,8 +91,8 @@ and the following input is optional
 
 zFreq (float) is a new axial secular frequency. If you include this parameter, while the cloud is evolving, the axial secular frequency will increase or decrease linearly with time from its initial value at time = 0 (as specified in zPot in initializeCloud) to this final value zFreq at time = t. This corresponds to slowly increasing or decreasing the voltage on the endcap electrodes, creating a tighter or looser trap. For most simulations, you'll just not include this 4th argument. That keeps the axial secular frequency static.
 
-
 For example, you could have myEvolvedCloud = evolveCloud(myFirstCloud,pulseSet,10e-3);
+
 
 
 Step 4: Extracting info from the evolved cloud
