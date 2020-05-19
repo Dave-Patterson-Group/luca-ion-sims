@@ -83,8 +83,8 @@ while t < fieldSet.times(end)
     if ionCloud.micro == 1
         for j = 1:ionCloud.numIons
             zForceK = ionCloud.potentialSet{((j-1)*3) + 3}.forceK; 
-            ionCloud.potentialSet{((j-1)*3) + 1}.trueForceK = ionCloud.potentialSet{((j-1)*3) + 1}.Ak * cos(ionCloud.potentialSet{((j-1)*3) + 1}.RF * 2 * pi * t ) - (0.5 * zForceK); % updatePotentialXY(ionCloud.potentialSet{((j-1)*3) + 1},t,zForceK);
-            ionCloud.potentialSet{((j-1)*3) + 2}.trueForceK = ionCloud.potentialSet{((j-1)*3) + 2}.Ak * cos(ionCloud.potentialSet{((j-1)*3) + 2}.RF * 2 * pi * t ) - (0.5 * zForceK); % updatePotentialXY(ionCloud.potentialSet{((j-1)*3) + 2},t,zForceK);
+            ionCloud.potentialSet{((j-1)*3) + 1}.trueForceK = ionCloud.potentialSet{((j-1)*3) + 1}.Ak * cos((ionCloud.potentialSet{((j-1)*3) + 1}.RF * 2 * pi * t ) + ionCloud.potentialSet{((j-1)*3) + 1}.phase) - (0.5 * zForceK); % updatePotentialXY(ionCloud.potentialSet{((j-1)*3) + 1},t,zForceK);
+            ionCloud.potentialSet{((j-1)*3) + 2}.trueForceK = ionCloud.potentialSet{((j-1)*3) + 2}.Ak * cos((ionCloud.potentialSet{((j-1)*3) + 2}.RF * 2 * pi * t ) + ionCloud.potentialSet{((j-1)*3) + 2}.phase) - (0.5 * zForceK); % updatePotentialXY(ionCloud.potentialSet{((j-1)*3) + 2},t,zForceK);
         end
     else
         for j = 1:ionCloud.numIons
@@ -96,6 +96,11 @@ while t < fieldSet.times(end)
 end
 
 finalCloud = ionCloud;
+
+for j = 1:finalCloud.numIons
+    finalCloud.potentialSet{((j-1)*3) + 1}.phase = mod((finalCloud.potentialSet{((j-1)*3) + 1}.RF * 2 * pi * t ) + finalCloud.potentialSet{((j-1)*3) + 1}.phase,2*pi);
+    finalCloud.potentialSet{((j-1)*3) + 2}.phase = mod((finalCloud.potentialSet{((j-1)*3) + 2}.RF * 2 * pi * t ) + finalCloud.potentialSet{((j-1)*3) + 2}.phase,2*pi);
+end
 
 trajectories = trajectories(1:i-1,:);  %trim down to actual length
 energies = energies(1:i-1);  %trim down to actual length

@@ -4,6 +4,7 @@ times = cloud.times;
 [f,p] = fourier(x,times);
 figure;
 plot(f,p);
+xlabel('Frequency (Hz)');
 xlim([0,5e6]);
 
 %This function plots the fourier transform of the trajectory of an ion.

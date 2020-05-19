@@ -16,3 +16,4 @@ pot.forceK = pot.mass * pot.angFreq^2;
 pot.Ak = B * (RF * 2 * pi) * m * sqrt(2*(pot.angFreq)^2 + (zForceK / m));
 pot.trueForceK = pot.Ak - (0.5 * zForceK);
 pot.axis = axis;
+pot.phase = 0;
