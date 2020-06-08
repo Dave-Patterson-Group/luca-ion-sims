@@ -9,7 +9,11 @@ switch pulse.pulseType
         wiggle = nArray;
         
     case{'tweezer'}
-        wiggle = ones(size(times));
+        if pulse.freq == 0 || ~isfield(pulse,'freq')
+            wiggle = ones(size(times));
+        else
+            wiggle = 0.5*square(times * 2 * pi * pulse.freq) + 0.5;
+        end
         
     case{'chirpx','chirpy','chirpz'}
         intStart = round(pulse.timeSpan(1) / 5e-9);

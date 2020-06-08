@@ -113,7 +113,14 @@ for i = 1:(floor(length(dim1Array{1}) / stepLength))
 %     tweezer, this following bit of code will plot the tweezer
     if ~isempty(opticalPulses) 
         for p = 1:length(opticalPulses)
-            if ((trueCurrentTime / 1000) > opticalPulses{p}.timeSpan(1)) && ((trueCurrentTime / 1000) < opticalPulses{p}.timeSpan(2))
+            
+            if opticalPulses{p}.freq == 0 || ~isfield(opticalPulses{p},'freq')
+                on = ones(size(cloud.times));
+            else
+                on = 0.5*square(cloud.times * 2   * pi * opticalPulses{p}.freq) + 0.5;
+            end
+            index = findIndex(cloud.times,trueCurrentTime / 1000);
+            if ((trueCurrentTime / 1000) > opticalPulses{p}.timeSpan(1)) && ((trueCurrentTime / 1000) < opticalPulses{p}.timeSpan(2)) && on(index) == 1
                 switch dim1
                     case 'x'
                         switch dim2

@@ -1,11 +1,14 @@
-function pulse = pulseTweezer(timespan,xCenter,yCenter,zCenter,depth)
+function pulse = pulseTweezer(timespan,xCenter,yCenter,zCenter,freq,depth)
 if nargin < 2
     xCenter = 0;
     yCenter = 0;
     zCenter = 0;
 end
-if nargin < 5
+if nargin < 6
     depth = 2.369e-25;
+end
+if nargin < 5
+    freq = 0;
 end
 pulse.pulseType = sprintf('tweezer');
 pulse.timeSpan = timespan;
@@ -15,6 +18,7 @@ pulse.depth = depth;
 pulse.x = xCenter;
 pulse.y = yCenter;
 pulse.z = zCenter;
+pulse.freq = freq;
 
 %This pulse models a potential due to optical tweezers being shined in from the x-axis.
 % The beam waist and Rayleigh length are set to the parameters Zeyun gave me,
@@ -28,3 +32,4 @@ pulse.z = zCenter;
 %depth is a float, it specifies the potential depth in Joules. If not
 % included when calling the function, it defaults to the depth given to me
 % by Zeyun's calculations. (ex. 5e-25)
+%freq is an optional strobing frequency for the tweezer.
